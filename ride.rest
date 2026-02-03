@@ -1,0 +1,12 @@
+PATCH   http://localhost:5000/passenger/Binta
+
+
+
+
+
+
+
+
+
+
+
