@@ -81,22 +81,23 @@ app.get('/passenger/:id', async (req, res) => {
 
 
 
-app.patch('/passenger/userName/:id', async (req,res) => { 
+app.patch('/passenger/update/:id/:uName', async (req,res) => { 
     
 
     try {
 
     const id = Number(req.params.id);
+    const uName = req.params.uName
 
     const collection = await getCollection();
-    const {newFrom , newTo} = req.body;
+    const {From , To} = req.body;
 
     const updatedPassenger =  await collection.updateOne( 
-        {"PassengerID" : id},
+        {"PassengerId": id, "Name" : uName},
         {
           $set: {
-            From: newFrom,
-            To: newTo,
+            From: From,
+            To: To,
           }  
         }
         
@@ -105,7 +106,7 @@ app.patch('/passenger/userName/:id', async (req,res) => {
     if (!updatedPassenger) {
         return res.status(404).json({message : "User not found to be deleted"});
     }
-        res.status(200).json({message: "Ride is successfully updated"});
+        res.status(200).json({message: "Ride is successfully updated", updatedFields: { From, To }});
 
 } catch (error) {
     res.send(500).json({error: "update failed"})
