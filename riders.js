@@ -59,25 +59,27 @@ app.post('/passenger', async (req, res) => {
 
 
 app.get('/passenger/:id', async (req, res) => {
-   try {
-    const collection = await getCollection();
-    const id = Number(req.params.id); 
+    try {
+        const collection = await getCollection();
+        const id = Number(req.params.id); 
 
-    const passenger = await collection.findOne({ PassengerId: id });
+        const passenger = await collection.findOne({ PassengerId: id });
 
-    if (!passenger) {
-        return res.status(404).json({
-            message: 'Passenger not found'
-        });
-    } else {
+        if (!passenger) {
+            return res.status(404).json({
+                message: 'Passenger not found'
+            });
+        } else {
 
-    res.status(201).json(passenger);
-    }
- } catch (error) {
-        res.status(500).json({error: "server error"});
-    }
+        res.status(201).json(passenger);
+        }
+    } catch (error) {
+            res.status(500).json({error: "server error"});
+        }
 
 });
+
+
 
 app.patch('/passenger/userName/:id', async (req,res) => { 
     
@@ -113,26 +115,27 @@ app.patch('/passenger/userName/:id', async (req,res) => {
 });
 
 
+
 app.delete('/passenger/:id/:Uname', async (req, res) => { 
-    try {
-    const collection = await getCollection();
-    const id = Number(req.params.id);
-    const Uname = req.params.Uname;
+        try {
+        const collection = await getCollection();
+        const id = Number(req.params.id);
+        const Uname = req.params.Uname; // just thought of adding the userName on the params making more secure, so the one deleting will need to know both the the riders name and thier ID. 
 
-   
-const passengerTobeDeleted = await collection.deleteOne({PassenegrId: id, Name: Uname});
+    
+        const passengerTobeDeleted = await collection.deleteOne({PassengerId: id, Name: Uname});
 
 
 
-if (passengerTobeDeleted.count === 0 ) { res.status(404).json({message: "user not found"});
+    if (passengerTobeDeleted.count === 0 ) { res.status(404).json({message: "user not found"});
 
-}
-
-        res.status(200).json({ message: "Passenger deleted successfully" });
-       
-    } catch (error) {
-        res.status(500).json({ error: "Server error during deletion" });
     }
+
+         res.status(200).json({ message: "You have succesfully deleted the passenger!" });
+            
+         } catch (error) {
+                res.status(500).json({ error: "Server error during deletion" });
+        }
 });
 
 
