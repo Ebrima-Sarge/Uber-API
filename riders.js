@@ -1,12 +1,18 @@
+require('dotenv').config();
+
 const express = require('express');
 const router = express.Router();
 const app = express();
 app.use(express.json());
 const bodyParser = require('body-parser');
 
+const port = process.env.PORT;
+const uri = process.env.DATABASE_URL;
+
+
 const { MongoClient, ObjectId } = require("mongodb");
 
-const client = new MongoClient("mongodb://localhost:27017");
+const client = new MongoClient(uri);
 
 async function getCollection() {
    
@@ -16,7 +22,6 @@ async function getCollection() {
     return db.collection("passengers");
 
 }
-const port = 5000;
 
 const passengers = [];
 
@@ -74,15 +79,18 @@ app.get('/passenger/:id', async (req, res) => {
 
 });
 
-app.patch('/passenger/userName', async (req,res) => { 
+app.patch('/passenger/userName/:id', async (req,res) => { 
     
+
     try {
 
+    const id = Number(req.params.id);
+
     const collection = await getCollection();
-    const {newFrom , newTo}= req.body;
+    const {newFrom , newTo} = req.body;
 
     const updatedPassenger =  await collection.updateOne( 
-        {"Name" : username},
+        {"PassengerID" : id},
         {
           $set: {
             From: newFrom,
@@ -92,7 +100,7 @@ app.patch('/passenger/userName', async (req,res) => {
         
     );
 
-    if (updatedPassenger.matchedCount === 0) {
+    if (!updatedPassenger) {
         return res.status(404).json({message : "User not found to be deleted"});
     }
         res.status(200).json({message: "Ride is successfully updated"});
