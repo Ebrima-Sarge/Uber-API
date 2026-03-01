@@ -1,10 +1,9 @@
-A simple RESTful API built with Node.js, Express, and MongoDB to manage ride-sharing passengers.
+A simple RESTful API built with Node.js, Express, and MongoDB to manage ride-sharing passengers help users create ride request, update and delete.
 
 To start the server, run:
-code
-Bash
-node server.js
-The server will start on the port defined in your .env file (default 3000).
+node riders.js
+
+The server will start on the port defined in the .env file .
 
 1. Create Passenger
 URL: POST /passenger

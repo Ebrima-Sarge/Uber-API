@@ -83,12 +83,13 @@ app.patch('/passenger/update/:id', async (req,res) => {
     try {
 
     const id = req.params.id;
-    const uName = req.params.uName
+    const uName = req.query.uName
+    const { From, To} = req.body;
 
     const collection = await getCollection();
-    const {From , To} = req.body;
+    
 
-    const updatedPassenger =  await collection.updateOne( 
+    const result =  await collection.updateOne( 
         {"PassengerId": id, "Name" : uName},
         {
           $set: {
@@ -116,8 +117,8 @@ app.patch('/passenger/update/:id', async (req,res) => {
 app.delete('/passenger/:id', async (req, res) => { 
         try {
         const collection = await getCollection();
-        const id = Number(req.params.id);
-        const Uname = req.params.Uname; // just thought of adding the userName on the params making more secure, so the one deleting will need to know both the the riders name and thier ID. 
+        const id = req.params.id;
+        const Uname = req.query.Uname; // just thought of adding the userName on the params making more secure, so the one deleting will need to know both the the riders name and thier ID. 
 
     
         const passengerTobeDeleted = await collection.deleteOne({PassengerId: id, Name: Uname});
@@ -142,7 +143,6 @@ app.delete('/passenger/:id', async (req, res) => {
 app.listen(port, () => {
    console.log('listining on port' + port)
 });
-
 
 
 
