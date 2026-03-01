@@ -1,10 +1,8 @@
 require('dotenv').config();
 
 const express = require('express');
-const router = express.Router();
 const app = express();
 app.use(express.json());
-const bodyParser = require('body-parser');
 
 const port = process.env.PORT;
 const uri = process.env.DATABASE_URL;
@@ -22,8 +20,6 @@ async function getCollection() {
     return db.collection("passengers");
 
 }
-
-const passengers = [];
 
 
 app.post('/passenger', async (req, res) => {
@@ -45,14 +41,14 @@ app.post('/passenger', async (req, res) => {
         From,
         To,
         Date: new Date(),
-        PassengerId: Date.now()
+        PassengerId: new ObjectId().toString()
     };
 
     await collection.insertOne(newPassenger)
-    res.status(202).json(newPassenger)
+    res.status(201).json(newPassenger)
 
 }catch (error) {console.error(error);
-    res.status(523).json({error: "Failed to save to database"})
+    res.status(500).json({error: "Failed to save to database"})
 }
 });
 
@@ -71,7 +67,7 @@ app.get('/passenger/:id', async (req, res) => {
             });
         } else {
 
-        res.status(201).json(passenger);
+        res.status(200).json(passenger);
         }
     } catch (error) {
             res.status(500).json({error: "server error"});
@@ -81,12 +77,12 @@ app.get('/passenger/:id', async (req, res) => {
 
 
 
-app.patch('/passenger/update/:id/:uName', async (req,res) => { 
+app.patch('/passenger/update/:id', async (req,res) => { 
     
 
     try {
 
-    const id = Number(req.params.id);
+    const id = req.params.id;
     const uName = req.params.uName
 
     const collection = await getCollection();
@@ -102,22 +98,22 @@ app.patch('/passenger/update/:id/:uName', async (req,res) => {
         }
         
     );
+     if (result.matchedCount === 0) {
+            return res.status(404).json({ message: "Passenger not found with provided ID and Name" });
+        }
 
-    if (!updatedPassenger) {
-        return res.status(404).json({message : "User not found to be deleted"});
+        res.status(200).json({ message: "Ride successfully updated", updatedFields: { From, To } });
+
+    } catch (error) {
+        res.status(500).json({ error: "Update failed" });
     }
-        res.status(200).json({message: "Ride is successfully updated", updatedFields: { From, To }});
 
-} catch (error) {
-    res.send(500).json({error: "update failed"})
-}
-     
 
 });
 
 
 
-app.delete('/passenger/:id/:Uname', async (req, res) => { 
+app.delete('/passenger/:id', async (req, res) => { 
         try {
         const collection = await getCollection();
         const id = Number(req.params.id);
