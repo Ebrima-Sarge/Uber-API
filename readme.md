@@ -1,7 +1,8 @@
 A simple RESTful API built with Node.js, Express, and MongoDB to manage ride-sharing passengers help users create ride request, update and delete.
 
 To start the server, run:
-node riders.js
+node --watch riders.js
+
 
 The server will start on the port defined in the .env file .
 
