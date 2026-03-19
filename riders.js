@@ -17,7 +17,7 @@ let dbInstance = null;
 async function getCollection() {
     if (!dbInstance) {
         await client.connect();
-        dbInstance = client.db("rides");
+        dbInstance = client.db("riders");
     }
     return dbInstance.collection("passengers");
 }
