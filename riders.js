@@ -15,14 +15,13 @@ const client = new MongoClient(uri);
 let dbInstance = null;
 
 async function getCollection() {
-    // If a connection already exists, reuse it
     if (!dbInstance) {
         await client.connect();
         dbInstance = client.db("rides");
-        console.log("Connected to MongoDB");
     }
     return dbInstance.collection("passengers");
 }
+
 
 app.post('/passenger', async (req, res) => {
 
@@ -59,7 +58,7 @@ app.post('/passenger', async (req, res) => {
 app.get('/passenger/:id', async (req, res) => {
     try {
         const collection = await getCollection();
-        const id = (req.params.id); 
+        const id = req.params.id; 
 
         const passenger = await collection.findOne({ PassengerId: id });
 
@@ -72,6 +71,7 @@ app.get('/passenger/:id', async (req, res) => {
         res.status(200).json(passenger);
         }
     } catch (error) {
+          console.error("DATABASE ERROR:", error);
             res.status(500).json({error: "server error"});
         }
 
@@ -127,7 +127,7 @@ app.delete('/passenger/:id', async (req, res) => {
 
 
 
-    if (passengerTobeDeleted.deletecount === 0 ) { res.status(404).json({message: "user not found"});
+    if (passengerTobeDeleted.deletedCount === 0 ) { res.status(404).json({message: "user not found"});
 
     }
 
@@ -142,14 +142,15 @@ app.delete('/passenger/:id', async (req, res) => {
 
 
 
-if(process.env.NODE_ENV !== 'production') {
-    const port = process.envPORT || 3000;
-    app.listen( port, () => {
-        console.log('Listening on port' + port)
+if (process.env.NODE_ENV !== 'production') {
+    const port = process.env.PORT || 3000;
+    app.listen(port, () => {
+       console.log('listening on port ' + port)
     });
 }
 
-module.export = app;
+module.exports = app;
+
 
 
 
