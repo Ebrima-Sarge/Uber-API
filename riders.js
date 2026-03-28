@@ -2,10 +2,19 @@ require('dotenv').config();
 
 const express = require('express');
 const app = express();
+const cors = require("cors");
+
+
+
+
 app.use(express.json());
+app.use(cors());
+
 
 const port = process.env.PORT;
 const uri = process.env.DATABASE_URL;
+
+
 
 
 const { MongoClient, ObjectId } = require("mongodb");
@@ -24,34 +33,64 @@ async function getCollection() {
 
 
 app.post('/passenger', async (req, res) => {
-
    try{
-   const collection = await getCollection();
-    const { Name, From, To } = req.body;
+       const collection = await getCollection();
+       
+       // *** CHANGE HERE: Match the casing of the JSON body ***
+       const { FirstName, LastName, From, To } = req.body; 
+       
+       // Validation now works because FirstName and LastName will have values
+       if (!FirstName || !LastName || !From || !To) {
+           return res.status(406).json({
+               message: 'passengers details required'
+           });
+       }
 
-    
+       const newPassenger = {
+           FirstName, // Saves as FirstName
+           LastName,  // Saves as LastName
+           From,
+           To,
+           Date: new Date(),
+           PassengerId: new ObjectId().toString()
+       };
 
-    if (!Name || !From || !To) {
-        return res.status(406).json({
-            message: 'passengers details required'
-        });
-    }
+       await collection.insertOne(newPassenger)
+       res.status(201).json(newPassenger)
 
-    const newPassenger = {
-        Name,
-        From,
-        To,
-        Date: new Date(),
-        PassengerId: new ObjectId().toString()
-    };
-
-    await collection.insertOne(newPassenger)
-    res.status(201).json(newPassenger)
-
-}catch (error) {console.error(error);
-    res.status(500).json({error: "Failed to save to database"})
-}
+   } catch (error) {console.error(error);
+       res.status(500).json({error: "Failed to save to database"})
+   }
 });
+
+
+
+
+
+
+app.get('/passenger', async (req, res) => {
+    try {
+        const collection = await getCollection();
+        
+        // Find all documents in the collection (passing {} means no filter)
+        const passengers = await collection.find({}).toArray();
+
+        if (!passengers || passengers.length === 0) {
+            return res.status(404).json({
+                message: 'No passengers found in the database'
+            });
+        }
+
+        // Respond with the array of passenger objects
+        res.status(200).json(passengers);
+
+    } catch (error) {
+        console.error("Error fetching all passengers:", error);
+        res.status(500).json({ error: "Server error while fetching all passengers" });
+    }
+});
+
+
 
 
 
@@ -85,14 +124,15 @@ app.patch('/passenger/update/:id', async (req,res) => {
     try {
 
     const id = req.params.id;
-    const uName = req.query.uName
+    const FirstName = req.query.firstName
+    const LastName = req.query.LastName
     const { From, To} = req.body;
 
     const collection = await getCollection();
     
 
     const result =  await collection.updateOne( 
-        {"PassengerId": id, "Name" : uName},
+        {"PassengerId": id, "fName" : FirstName, 'lName' : LastName},
         {
           $set: {
             From: From,
@@ -120,10 +160,11 @@ app.delete('/passenger/:id', async (req, res) => {
         try {
         const collection = await getCollection();
         const id = req.params.id;
-        const Uname = req.query.Uname; // just thought of adding the userName on the params making more secure, so the one deleting will need to know both the the riders name and thier ID. 
+        const FirstName = req.query.FirstName; 
+        const LastName = req.query.LastName;// just thought of adding the userName on the params making more secure, so the one deleting will need to know both the the riders name and thier ID. 
 
     
-        const passengerTobeDeleted = await collection.deleteOne({PassengerId: id, Name: Uname});
+        const passengerTobeDeleted = await collection.deleteOne({PassengerId: id, FirstName: FirstName, LastName: LastName});
 
 
 
